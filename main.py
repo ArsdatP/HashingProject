@@ -5,6 +5,7 @@ import statistics
 from collections import namedtuple
 import time
 import sys
+import random
 
 # TABLE_SIZE should be a prime number, see:
 # https://medium.com/swlh/why-should-the-length-of-your-hash-table-be-a-prime-number-760ec65a75d1
@@ -66,7 +67,7 @@ class Hash_table():
                     self.collisions += 1
                 return True
 
-            bucket + (bucket + 1) % self.n_buckets
+            bucket = (bucket + 1) % self.n_buckets
             buckets_probed += 1
 
         return False
@@ -79,10 +80,12 @@ class Hash_table():
     def search_linear (self, key_str):
         bucket = self.compute_hash_bucket(key_str)
 
-        while self.bucket_list[bucket].key != "":
+        buckets_probed = 0
+
+        while buckets_probed < self.n_buckets and self.bucket_list[bucket].key != "":
             if self.bucket_list[bucket].key == key_str:
                 return self.bucket_list[bucket].val
-            bucket + (bucket + 1) % self.n_buckets
+            bucket = (bucket + 1) % self.n_buckets
 
         return None
 
@@ -120,12 +123,12 @@ def load_lynx_json(c_name, f_name):
 def main():
 
 
+    #This is the optional task comparing Python Dict vs Hash Table
     def test_python(master_stops_list):
         times = []
         for x in range(5):
             t0 = time.perf_counter_ns()
             test_dict = {}
-            {}
             for this_stop in master_stops_list:
                 test_dict[this_stop.code] = this_stop.name
 
@@ -149,7 +152,21 @@ def main():
 
     # get time in nanoseconds -- maybe OS-specific?
     # See https://docs.python.org/3/library/time.html
-    t0 = time.perf_counter_ns()
+    test_python(master_stops_list)
+
+    tracker = []
+    for x in range(5):
+        t0 = time.perf_counter_ns()
+
+        for this_stop in master_stops_list:
+                the_hash_table.insert(this_stop.code, this_stop.name)
+
+        t1 = time.perf_counter_ns() - t0
+        tracker.append(t1)
+
+    average_time = statistics.mean(tracker)
+    print("Hash Table average time in (ns) " + str(average_time))
+    print("Attempts: ", tracker)
 
 
     
@@ -159,16 +176,26 @@ def main():
             sucessful_inserts = sucessful_inserts + 1
     t1 = time.perf_counter_ns() - t0
     print( "elapsed ns = " + str(t1 ))
-
+    print("Total Stops = " + str(stops_processed))
     print("stops_processed = " + str(stops_processed))
     print("sucessful_inserts = " + str(sucessful_inserts))
     print( "collisions = " + str(the_hash_table.collisions ))
 
     # Your test and debug code here...
-    the_hash_table.print_hash_table(20, 25)
+    #the_hash_table.print_hash_table(20, 25)
     test_stop = the_hash_table.search_linear("10036")
-    print("test_stop = " + test_stop)
-    test_python(master_stops_list)
+    #print("test_stop = " + test_stop)
+
+    random_stops = random.sample(master_stops_list, 5)
+
+    # Then insert everything as usual
+    for this_stop in master_stops_list:
+        the_hash_table.insert(this_stop.code, this_stop.name)
+
+    # Lookup only the 5 sampled keys
+    for stop in random_stops:
+        result = the_hash_table.search_linear(stop.code)
+        print(f"Lookup {stop.code} -> {result}")
 
 if __name__ == "__main__":
     main()
