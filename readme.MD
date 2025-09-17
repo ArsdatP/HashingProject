@@ -1,4 +1,4 @@
-#Hashing Project COP-4530C#
+                      #Hashing Project COP-4530C#
 
 This assignment dives in deeper on the different styles of hashing and teaches different 
 methods of probing through a Hash List.
